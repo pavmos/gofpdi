@@ -1526,7 +1526,7 @@ func (this *PdfReader) getPageBox(page *PdfValue, box_index string, k float64) (
 			h := math.Abs(box.Array[1].Real-box.Array[3].Real) / k
 
 			// apply rotation
-			rotation, err := this.getPageRotation(page.Int)
+			rotation, err := this.getPageRotation(page.Int + 1)
 			if err != nil {
 				return nil, errors.Wrap(err, "Failed to get page rotation")
 			}
