@@ -1,4 +1,4 @@
-module github.com/pavmos/gofpdi
+module github.com/pavmos/gopdf
 
 go 1.12
 
