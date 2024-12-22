@@ -86,13 +86,13 @@ func (this *Importer) SetSourceFile(f string) {
 	}
 }
 
-func (this *Importer) SetSourceStream(rs *io.ReadSeeker) {
+func (this *Importer) SetSourceStream(rs *io.ReadSeeker) error {
 	this.sourceFile = fmt.Sprintf("%v", rs)
 
 	if _, ok := this.readers[this.sourceFile]; !ok {
 		reader, err := NewPdfReaderFromStream(this.sourceFile, *rs)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		this.readers[this.sourceFile] = reader
 	}
@@ -101,13 +101,15 @@ func (this *Importer) SetSourceStream(rs *io.ReadSeeker) {
 	if _, ok := this.writers[this.sourceFile]; !ok {
 		writer, err := NewPdfWriter("")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		// Make the next writer start template numbers at this.tplN
 		writer.SetTplIdOffset(this.tplN)
 		this.writers[this.sourceFile] = writer
 	}
+
+	return nil
 }
 
 func (this *Importer) GetNumPages() int {
@@ -120,14 +122,14 @@ func (this *Importer) GetNumPages() int {
 	return result
 }
 
-func (this *Importer) GetPageSizes() map[int]map[string]map[string]float64 {
+func (this *Importer) GetPageSizes() (map[int]map[string]map[string]float64, error) {
 	result, err := this.GetReader().getAllPageBoxes(1.0)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return result
+	return result, nil
 }
 
 func (this *Importer) ImportPage(pageno int, box string) int {

@@ -1517,12 +1517,31 @@ func (this *PdfReader) getPageBox(page *PdfValue, box_index string, k float64) (
 			// If the box type is an array, calculate scaled value based on k
 			result["x"] = box.Array[0].Real / k
 			result["y"] = box.Array[1].Real / k
-			result["w"] = math.Abs(box.Array[0].Real-box.Array[2].Real) / k
-			result["h"] = math.Abs(box.Array[1].Real-box.Array[3].Real) / k
 			result["llx"] = math.Min(box.Array[0].Real, box.Array[2].Real)
 			result["lly"] = math.Min(box.Array[1].Real, box.Array[3].Real)
 			result["urx"] = math.Max(box.Array[0].Real, box.Array[2].Real)
 			result["ury"] = math.Max(box.Array[1].Real, box.Array[3].Real)
+
+			w := math.Abs(box.Array[0].Real-box.Array[2].Real) / k
+			h := math.Abs(box.Array[1].Real-box.Array[3].Real) / k
+
+			// apply rotation
+			rotation, err := this.getPageRotation(page.Int)
+			if err != nil {
+				return nil, errors.Wrap(err, "Failed to get page rotation")
+			}
+			angle := rotation.Int % 360
+
+			// Normalize angle
+			if angle != 0 {
+				steps := angle / 90
+				if steps%2 != 0 {
+					w, h = h, w
+				}
+			}
+
+			result["w"] = w
+			result["h"] = h
 		} else {
 			// TODO: Improve error handling
 			return nil, errors.New("Could not get page box")
